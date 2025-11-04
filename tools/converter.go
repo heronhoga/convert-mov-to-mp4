@@ -1,4 +1,4 @@
-package main
+package converter
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func main() {
+func Convert() {
 	if err := os.MkdirAll("output", os.ModePerm); err != nil {
 		fmt.Println("Error creating directory:", err)
 		return
