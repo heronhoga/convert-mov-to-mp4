@@ -1,4 +1,4 @@
-package converter
+package tools
 
 import (
 	"fmt"
@@ -7,35 +7,41 @@ import (
 	"path/filepath"
 )
 
-func Convert() {
-	if err := os.MkdirAll("output", os.ModePerm); err != nil {
-		fmt.Println("Error creating directory:", err)
-		return
-	}
-
-	entries, err := os.ReadDir("input")
+func Convert(input string, output string) {
+	entries, err := os.ReadDir(input)
 	if err != nil {
-		fmt.Println("Error reading directory:", err)
+		fmt.Println("Error reading input directory:", err)
 		return
 	}
 
-	fmt.Println("Total video to convert: ", len(entries))
-	fmt.Println("Processing..")
-	for index, e := range entries {
-		if !e.IsDir() {
-			inputFile := filepath.Join("input", e.Name())
-			outputName := filepath.Join("output", e.Name() + ".mp4")
-
-			cmd := exec.Command("ffmpeg", "-i", inputFile, "-q:v", "0", outputName)
-			err := cmd.Run()
-			if err != nil {
-				fmt.Println("Error running FFmpeg:", err)
-				continue
-			}
-
-			fmt.Println("Converted video: ", index+1, " ", e.Name())
-		}
+	// Ensure output directory exists
+	if err := os.MkdirAll(output, os.ModePerm); err != nil {
+		fmt.Println("Error creating output directory:", err)
+		return
 	}
-	fmt.Println("All videos have been converted :D")
 
+	fmt.Printf("Total videos to convert: %d\n", len(entries))
+	fmt.Println("Processing...")
+
+	for index, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+
+		inputFile := filepath.Join(input, e.Name())
+		outputName := filepath.Join(output, e.Name()+"-output.mp4")
+
+		cmd := exec.Command("ffmpeg", "-i", inputFile, "-q:v", "0", outputName)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Run(); err != nil {
+			fmt.Printf("[%d] Error converting %s: %v\n", index+1, e.Name(), err)
+			continue
+		}
+
+		fmt.Printf("[%d] Converted: %s → %s\n", index+1, e.Name(), outputName)
+	}
+
+	fmt.Println("All videos converted successfully.")
 }
