@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func Convert(input string, output string) {
@@ -35,12 +36,14 @@ func Convert(input string, output string) {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
-		if err := cmd.Run(); err != nil {
-			fmt.Printf("[%d] Error converting %s: %v\n", index+1, e.Name(), err)
-			continue
+		ext := strings.ToLower(filepath.Ext(inputFile))
+		if ext == ".mov" {
+			if err := cmd.Run(); err != nil {
+				fmt.Printf("[%d] Error converting %s: %v\n", index+1, e.Name(), err)
+				continue
+			}
+			fmt.Printf("[%d] Converted: %s → %s\n", index+1, e.Name(), outputName)
 		}
-
-		fmt.Printf("[%d] Converted: %s → %s\n", index+1, e.Name(), outputName)
 	}
 
 	fmt.Println("All videos converted successfully.")
