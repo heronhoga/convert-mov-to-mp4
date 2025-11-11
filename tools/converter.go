@@ -9,6 +9,12 @@ import (
 )
 
 func Convert(input string, output string) {
+	ffmpegPath, err := getFFmpegPath()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
 	entries, err := os.ReadDir(input)
 	if err != nil {
 		fmt.Println("Error reading input directory:", err)
@@ -32,7 +38,7 @@ func Convert(input string, output string) {
 		inputFile := filepath.Join(input, e.Name())
 		outputName := filepath.Join(output, e.Name()+"-output.mp4")
 
-		cmd := exec.Command("ffmpeg", "-i", inputFile, "-q:v", "0", outputName)
+		cmd := exec.Command(ffmpegPath, "-i", inputFile, "-q:v", "0", outputName)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
